@@ -21,23 +21,23 @@ class PhotoPickerWithNavigationViewController: TLPhotosPickerViewController {
             self?.dismissCompletion?()
         }
     }
-    
+
     override func doneButtonTap() {
         let imagePreviewVC = ImagePreviewViewController()
         imagePreviewVC.assets = self.selectedAssets.first
         self.navigationController?.pushViewController(imagePreviewVC, animated: true)
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(true, animated: true)
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         if self.navigationController?.topViewController is ImagePreviewViewController {
             self.navigationController?.setNavigationBarHidden(false, animated: true)
-        }else {
+        } else {
             self.navigationController?.setNavigationBarHidden(true, animated: true)
         }
     }

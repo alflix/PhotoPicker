@@ -14,19 +14,19 @@ struct CustomDataSources: TLPhotopickerDataSourcesProtocol {
     func headerReferenceSize() -> CGSize {
         return CGSize(width: 320, height: 50)
     }
-    
+
     func footerReferenceSize() -> CGSize {
         return CGSize.zero
     }
-    
+
     func supplementIdentifier(kind: String) -> String {
         if kind == UICollectionView.elementKindSectionHeader {
             return "CustomHeaderView"
-        }else {
+        } else {
             return "CustomFooterView"
         }
     }
-    
+
     func registerSupplementView(collectionView: UICollectionView) {
         let headerNib = UINib(nibName: "CustomHeaderView", bundle: Bundle.main)
         collectionView.register(headerNib,
@@ -37,7 +37,7 @@ struct CustomDataSources: TLPhotopickerDataSourcesProtocol {
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
                                 withReuseIdentifier: "CustomFooterView")
     }
-    
+
     func configure(supplement view: UICollectionReusableView, section: (title: String, assets: [TLPHAsset])) {
         if let reuseView = view as? CustomHeaderView {
             let dateFormat = DateFormatter()
@@ -46,7 +46,7 @@ struct CustomDataSources: TLPhotopickerDataSourcesProtocol {
             if let date = section.assets.first?.phAsset?.creationDate {
                 reuseView.titleLabel.text = dateFormat.string(from: date)
             }
-        }else if let reuseView = view as? CustomFooterView {
+        } else if let reuseView = view as? CustomFooterView {
             reuseView.titleLabel.text = "Footer"
         }
     }

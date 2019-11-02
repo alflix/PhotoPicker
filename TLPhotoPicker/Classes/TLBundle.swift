@@ -17,7 +17,7 @@ open class TLBundle {
         }
         return nil
     }
-    
+
     class func bundle() -> Bundle {
         let podBundle = Bundle(for: TLBundle.self)
         if let url = podBundle.url(forResource: "TLPhotoPicker", withExtension: "bundle") {

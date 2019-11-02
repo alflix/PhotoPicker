@@ -10,12 +10,12 @@ import UIKit
 import TLPhotoPicker
 import Photos
 
-class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
-    
+class ViewController: UIViewController, TLPhotosPickerViewControllerDelegate {
+
     var selectedAssets = [TLPHAsset]()
     @IBOutlet var label: UILabel!
     @IBOutlet var imageView: UIImageView!
-    
+
     @IBAction func pickerButtonTap() {
         let viewController = CustomPhotoPickerViewController()
         viewController.delegate = self
@@ -30,7 +30,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
 
         self.present(viewController, animated: true, completion: nil)
     }
-    
+
     @IBAction func pickerWithCustomCameraCell() {
         let viewController = CustomPhotoPickerViewController()
         viewController.delegate = self
@@ -46,7 +46,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         viewController.selectedAssets = self.selectedAssets
         self.present(viewController.wrapNavigationControllerWithoutBar(), animated: true, completion: nil)
     }
-    
+
     @IBAction func pickerWithCustomBlackStyle() {
         let viewController = CustomBlackStylePickerViewController()
         viewController.delegate = self
@@ -70,10 +70,10 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         configure.numberOfColumn = 3
         viewController.configure = configure
         viewController.selectedAssets = self.selectedAssets
-        
+
         self.present(viewController.wrapNavigationControllerWithoutBar(), animated: true, completion: nil)
     }
-    
+
     @IBAction func pickerWithCustomRules() {
         let viewController = PhotoPickerWithNavigationViewController()
         viewController.delegate = self
@@ -92,10 +92,10 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         configure.nibSet = (nibName: "CustomCell_Instagram", bundle: Bundle.main)
         viewController.configure = configure
         viewController.selectedAssets = self.selectedAssets
-        
+
         self.present(viewController.wrapNavigationControllerWithoutBar(), animated: true, completion: nil)
     }
-    
+
     @IBAction func pickerWithCustomLayout() {
         let viewController = TLPhotosPickerViewController()
         viewController.delegate = self
@@ -111,7 +111,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         viewController.logDelegate = self
         self.present(viewController, animated: true, completion: nil)
     }
-    
+
     func dismissPhotoPicker(withTLPHAssets: [TLPHAsset]) {
         // use selected order, fullresolution image
         self.selectedAssets = withTLPHAssets
@@ -119,7 +119,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         //iCloud or video
 //        getAsyncCopyTemporaryFile()
     }
-    
+
     func exportVideo() {
         if let asset = self.selectedAssets.first, asset.type == .video {
             asset.exportVideoFile(progressBlock: { (progress) in
@@ -130,7 +130,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
             }
         }
     }
-    
+
     func getAsyncCopyTemporaryFile() {
         if let asset = self.selectedAssets.first {
             asset.tempCopyMediaFile(convertLivePhotosToJPG: false, progressBlock: { (progress) in
@@ -141,7 +141,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
             })
         }
     }
-    
+
     func getFirstSelectedImage() {
         if let asset = self.selectedAssets.first {
             if asset.type == .video {
@@ -154,7 +154,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
                 print(image)
                 self.label.text = "local storage image"
                 self.imageView.image = image
-            }else {
+            } else {
                 print("Can't get image at local storage, try download image")
                 asset.cloudImageDownload(progressBlock: { [weak self] (progress) in
                     DispatchQueue.main.async {
@@ -173,7 +173,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
             }
         }
     }
-    
+
     func dismissPhotoPicker(withPHAssets: [PHAsset]) {
         // if you want to used phasset.
     }
@@ -189,7 +189,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
     func didExceedMaximumNumberOfSelection(picker: TLPhotosPickerViewController) {
         self.showExceededMaximumAlert(vc: picker)
     }
-    
+
     func handleNoAlbumPermissions(picker: TLPhotosPickerViewController) {
         picker.dismiss(animated: true) {
             let alert = UIAlertController(title: "", message: "Denied albums permissions granted", preferredStyle: .alert)
@@ -197,7 +197,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
             self.present(alert, animated: true, completion: nil)
         }
     }
-    
+
     func handleNoCameraPermissions(picker: TLPhotosPickerViewController) {
         let alert = UIAlertController(title: "", message: "Denied camera permissions granted", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
@@ -209,7 +209,7 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
         vc.present(alert, animated: true, completion: nil)
     }
-    
+
     func showUnsatisifiedSizeAlert(vc: UIViewController) {
         let alert = UIAlertController(title: "Oups!", message: "The required size is: 300 x 300", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
@@ -222,15 +222,15 @@ extension ViewController: TLPhotosPickerLogDelegate {
     func selectedCameraCell(picker: TLPhotosPickerViewController) {
         print("selectedCameraCell")
     }
-    
+
     func selectedPhoto(picker: TLPhotosPickerViewController, at: Int) {
         print("selectedPhoto")
     }
-    
+
     func deselectedPhoto(picker: TLPhotosPickerViewController, at: Int) {
         print("deselectedPhoto")
     }
-    
+
     func selectedAlbum(picker: TLPhotosPickerViewController, title: String, at: Int) {
         print("selectedAlbum")
     }

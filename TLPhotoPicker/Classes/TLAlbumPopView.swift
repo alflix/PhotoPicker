@@ -59,11 +59,11 @@ open class TLAlbumPopView: UIView, PopupViewProtocol {
     @IBOutlet open var tableView: UITableView!
     @objc var originalFrame = CGRect.zero
     @objc var show = false
-    
+
     deinit {
 //        print("deinit TLAlbumPopView")
     }
-    
+
     override open func awakeFromNib() {
         super.awakeFromNib()
         self.popupView.layer.cornerRadius = 5.0
@@ -74,7 +74,7 @@ open class TLAlbumPopView: UIView, PopupViewProtocol {
             self.popupView.backgroundColor = .systemBackground
         }
     }
-    
+
     @objc func tapBgView() {
         self.show(false)
     }

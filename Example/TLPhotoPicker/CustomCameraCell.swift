@@ -19,13 +19,13 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
         case notAuthorized
         case configurationFailed
     }
-    
+
     private let session = AVCaptureSession()
     private var isSessionRunning = false
     private let sessionQueue = DispatchQueue(label: "session queue") // Communicate with the session and other session objects on this queue.
     private var setupResult: SessionSetupResult = .success
     var videoDeviceInput: AVCaptureDeviceInput!
-    
+
     @IBOutlet private weak var previewView: PreviewView!
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -42,7 +42,7 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
         case .authorized:
             // The user has previously granted access to the camera.
             break
-            
+
         case .notDetermined:
             /*
              The user has not yet been presented with the option to grant
@@ -59,12 +59,12 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
                 }
                 self.sessionQueue.resume()
             })
-            
+
         default:
             // The user has previously denied access.
             setupResult = .notAuthorized
         }
-        
+
         /*
          Setup the capture session.
          In general it is not safe to mutate an AVCaptureSession or any of its
@@ -79,7 +79,7 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
             self.configureSession()
         }
     }
-    
+
     override func willDisplayCell() {
         super.willDisplayCell()
         if Platform.isSimulator {
@@ -97,7 +97,7 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
             }
         }
     }
-    
+
     override func endDisplayingCell() {
         if Platform.isSimulator {
             return
@@ -111,18 +111,18 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
         }
         super.endDisplayingCell()
     }
-    
+
     // Call this on the session queue.
     private func configureSession() {
         if setupResult != .success {
             return
         }
-        
+
         session.beginConfiguration()
         session.sessionPreset = .photo
         do {
             var defaultVideoDevice: AVCaptureDevice?
-            
+
             // Choose the back dual camera if available, otherwise default to a wide angle camera.
             if let dualCameraDevice = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: .back) {
                 defaultVideoDevice = dualCameraDevice
@@ -136,13 +136,13 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
                  */
                 defaultVideoDevice = frontCameraDevice
             }
-            
+
             let videoDeviceInput = try AVCaptureDeviceInput(device: defaultVideoDevice!)
-            
+
             if session.canAddInput(videoDeviceInput) {
                 session.addInput(videoDeviceInput)
                 self.videoDeviceInput = videoDeviceInput
-                
+
                 DispatchQueue.main.async {
                     /*
                      Why are we dispatching this to the main queue?
@@ -185,35 +185,34 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
             session.commitConfiguration()
             return
         }
-        
+
         session.commitConfiguration()
     }
-    
+
     private enum CaptureMode: Int {
         case photo = 0
         case movie = 1
     }
-    
+
     // MARK: Device Configuration
     let videoDeviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .builtInDualCamera],
                                                                                mediaType: .video, position: .unspecified)
 
     // MARK: Capturing Photos
-    
 
     let photoOutput = AVCapturePhotoOutput()
-    
+
     var inProgressPhotoCaptureDelegates = [Int64: PhotoCaptureProcessor]()
 
     override func selectedCell() {
         let videoPreviewLayerOrientation = previewView.videoPreviewLayer.connection?.videoOrientation
-        
+
         sessionQueue.async {
             // Update the photo output's connection to match the video orientation of the video preview layer.
             if let photoOutputConnection = self.photoOutput.connection(with: .video) {
                 photoOutputConnection.videoOrientation = videoPreviewLayerOrientation!
             }
-            
+
             var photoSettings = AVCapturePhotoSettings()
             // Capture HEIF photo when supported, with flash set to auto and high resolution photo enabled.
             if #available(iOS 11.0, *) {
@@ -223,16 +222,16 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
             } else {
                 // Fallback on earlier versions
             }
-            
+
             if self.videoDeviceInput.device.isFlashAvailable {
                 photoSettings.flashMode = .auto
             }
-            
+
             photoSettings.isHighResolutionPhotoEnabled = true
             if !photoSettings.__availablePreviewPhotoPixelFormatTypes.isEmpty {
                 photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: photoSettings.__availablePreviewPhotoPixelFormatTypes.first!]
             }
-            
+
             // Use a separate object for the photo capture delegate to isolate each capture life cycle.
             let photoCaptureProcessor = PhotoCaptureProcessor(with: photoSettings, willCapturePhotoAnimation: {
                 DispatchQueue.main.async {
@@ -241,7 +240,7 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
                         self.previewView.videoPreviewLayer.opacity = 1
                     }
                 }
-            }, livePhotoCaptureHandler: { capturing in
+            }, livePhotoCaptureHandler: { _ in
             }, completionHandler: { photoCaptureProcessor in
                 // When the capture is complete, remove a reference to the photo capture delegate so it can be deallocated.
                 self.sessionQueue.async {
@@ -268,14 +267,14 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
                 }
             }
         }
-        
+
         var success = true
-        
+
         if error != nil {
             print("Movie file finishing error: \(String(describing: error))")
             success = (((error! as NSError).userInfo[AVErrorRecordingSuccessfullyFinishedKey] as AnyObject).boolValue)!
         }
-        
+
         if success {
             // Check authorization status.
             PHPhotoLibrary.requestAuthorization { status in
@@ -307,13 +306,13 @@ class CustomCameraCell: TLPhotoCollectionViewCell, AVCaptureFileOutputRecordingD
 extension AVCaptureDevice.DiscoverySession {
     var uniqueDevicePositionsCount: Int {
         var uniqueDevicePositions: [AVCaptureDevice.Position] = []
-        
+
         for device in devices {
             if !uniqueDevicePositions.contains(device.position) {
                 uniqueDevicePositions.append(device.position)
             }
         }
-        
+
         return uniqueDevicePositions.count
     }
 }

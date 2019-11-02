@@ -58,7 +58,7 @@ class PreviewView: UIView {
         layer.videoGravity = .resizeAspectFill
         return layer
     }
-    
+
     var session: AVCaptureSession? {
         get {
             return videoPreviewLayer.session
@@ -67,11 +67,10 @@ class PreviewView: UIView {
             videoPreviewLayer.session = newValue
         }
     }
-    
+
     // MARK: UIView
-    
+
     override class var layerClass: AnyClass {
         return AVCaptureVideoPreviewLayer.self
     }
 }
-

@@ -10,9 +10,9 @@ import Foundation
 import TLPhotoPicker
 
 extension UIImage {
-    public func colorMask(color:UIColor) -> UIImage {
+    public func colorMask(color: UIColor) -> UIImage {
         var result: UIImage?
-        let rect = CGRect(x:0, y:0, width:size.width, height:size.height)
+        let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
         UIGraphicsBeginImageContextWithOptions(rect.size, false, scale)
         if let c = UIGraphicsGetCurrentContext() {
             self.draw(in: rect)
@@ -40,11 +40,11 @@ class CustomBlackStylePickerViewController: TLPhotosPickerViewController {
         self.albumPopView.popupView.backgroundColor = .black
         self.albumPopView.tableView.backgroundColor = .black
     }
-    
+
     @objc func customAction() {
         self.dismiss(animated: true, completion: nil)
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath) as! TLCollectionTableViewCell
         cell.backgroundColor = .black
