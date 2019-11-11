@@ -18,6 +18,7 @@ public protocol TLPhotosPickerViewControllerDelegate: class {
     func photoPickerDidCancel()
     func canSelectAsset(phAsset: PHAsset) -> Bool
     func didExceedMaximumNumberOfSelection(picker: TLPhotosPickerViewController)
+    func didExceedMaximumVideoSizeOfSelection(picker: TLPhotosPickerViewController)
     func handleNoAlbumPermissions(picker: TLPhotosPickerViewController)
     func handleNoCameraPermissions(picker: TLPhotosPickerViewController)
 }
@@ -30,6 +31,7 @@ extension TLPhotosPickerViewControllerDelegate {
     public func photoPickerDidCancel() { }
     public func canSelectAsset(phAsset: PHAsset) -> Bool { return true }
     public func didExceedMaximumNumberOfSelection(picker: TLPhotosPickerViewController) { }
+    public func didExceedMaximumVideoSizeOfSelection(picker: TLPhotosPickerViewController) {}
     public func handleNoAlbumPermissions(picker: TLPhotosPickerViewController) { }
     public func handleNoCameraPermissions(picker: TLPhotosPickerViewController) { }
 }
@@ -72,6 +74,7 @@ public struct TLPhotosPickerConfigure {
     public var cellItemSpace: CGFloat = 5
     public var singleSelectedMode = false
     public var maxSelectedAssets: Int?
+    public var maxSelectedVideoAssetsSize: Int?
     public var fetchOption: PHFetchOptions?
     public var fetchCollectionOption: [FetchCollectionType: PHFetchOptions] = [:]
     public var selectedColor = UIColor(red: 88/255, green: 144/255, blue: 255/255, alpha: 1.0)
@@ -173,6 +176,7 @@ open class TLPhotosPickerViewController: UIViewController {
     }
     @objc open var canSelectAsset: ((PHAsset) -> Bool)?
     @objc open var didExceedMaximumNumberOfSelection: ((TLPhotosPickerViewController) -> Void)?
+    @objc open var didExceedMaximumVideoSizeOfSelection: ((TLPhotosPickerViewController) -> Void)?
     @objc open var handleNoAlbumPermissions: ((TLPhotosPickerViewController) -> Void)?
     @objc open var handleNoCameraPermissions: ((TLPhotosPickerViewController) -> Void)?
     @objc open var dismissCompletion: (() -> Void)?
@@ -589,6 +593,7 @@ extension TLPhotosPickerViewController: UIImagePickerControllerDelegate, UINavig
     private func showCamera() {
         guard !maxCheck() else { return }
         let picker = UIImagePickerController()
+        picker.navigationBar.setBackgroundImage(UIImage(), for: .default)
         picker.sourceType = .camera
         picker.mediaTypes = [(kUTTypeImage as String), (kUTTypeMovie as String)]
 
@@ -893,12 +898,29 @@ extension TLPhotosPickerViewController: UICollectionViewDelegate, UICollectionVi
             self.logDelegate?.selectedPhoto(picker: self, at: indexPath.row)
             guard !maxCheck() else { return }
             guard canSelect(phAsset: phAsset) else { return }
-            asset.selectedOrder = self.selectedAssets.count + 1
-            self.selectedAssets.append(asset)
-            cell.selectedAsset = true
-            cell.orderLabel?.text = "\(asset.selectedOrder)"
-            if asset.type != .photo, self.configure.autoPlay {
-                playVideo(asset: asset, indexPath: indexPath)
+            if asset.type == .video, let max = self.configure.maxSelectedVideoAssetsSize {
+                asset.videoSize { (size) in
+                    if max <= size {
+                        self.delegate?.didExceedMaximumVideoSizeOfSelection(picker: self)
+                        self.didExceedMaximumVideoSizeOfSelection?(self)
+                        return
+                    }
+                    asset.selectedOrder = self.selectedAssets.count + 1
+                    self.selectedAssets.append(asset)
+                    cell.selectedAsset = true
+                    cell.orderLabel?.text = "\(asset.selectedOrder)"
+                    if asset.type != .photo, self.configure.autoPlay {
+                        self.playVideo(asset: asset, indexPath: indexPath)
+                    }
+                }
+            } else {
+                asset.selectedOrder = self.selectedAssets.count + 1
+                self.selectedAssets.append(asset)
+                cell.selectedAsset = true
+                cell.orderLabel?.text = "\(asset.selectedOrder)"
+                if asset.type != .photo, self.configure.autoPlay {
+                    playVideo(asset: asset, indexPath: indexPath)
+                }
             }
         }
     }
