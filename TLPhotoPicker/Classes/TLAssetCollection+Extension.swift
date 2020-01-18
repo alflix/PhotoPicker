@@ -34,7 +34,7 @@ public enum PHFetchedResultGroupedBy {
 }
 
 extension TLAssetsCollection {
-    func enumarateFetchResult(groupedBy: PHFetchedResultGroupedBy) -> Dictionary<String, [TLPHAsset]> {
+    func enumarateFetchResult(groupedBy: PHFetchedResultGroupedBy) -> [String: [TLPHAsset]] {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = groupedBy.dateFormat
         var assets = [PHAsset]()
